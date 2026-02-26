@@ -30,6 +30,17 @@ namespace ExcelDataExport
                 return Path.GetFullPath(Path.Combine(baseDir, LubanPathRelative));
             }
         }
+        public string LubanConfigPathRelative { get; set; } = "";
+        [JsonIgnore]
+        public string LubanConfigPath
+        {
+            get
+            {
+                string baseDir = Path.GetDirectoryName(Application.ExecutablePath);
+                return Path.GetFullPath(Path.Combine(baseDir, LubanConfigPathRelative));
+            }
+        }
+
 
         [JsonIgnore]
         public string DataPath

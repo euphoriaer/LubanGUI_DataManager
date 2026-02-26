@@ -5,7 +5,7 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 
 public static class DialogTools
 {
-    public static string[] OpenFiles(out bool isOk, string filter)
+    public static string[] OpenFiles(out bool isOk, string filter= "所有文件|*.*")
     {
         List<string> fullNames = new List<string>();
         OpenFileDialog fileDialog = new OpenFileDialog();
