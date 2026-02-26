@@ -29,9 +29,6 @@ namespace ExcelDataExport
                 JsonConfig.ConfigInstance.configPath = jsonConfigFile;
 
             }
-
-
-               
             main.RefreshSetting();
             Application.Run(main);
         }

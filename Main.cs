@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics;
 
 namespace ExcelDataExport
@@ -9,9 +8,7 @@ namespace ExcelDataExport
         {
             InitializeComponent();
             //读取配置
-
-
-
+           
         }
 
         private void LubanPathSet_Click(object sender, EventArgs e)
@@ -104,8 +101,8 @@ namespace ExcelDataExport
         {
             airCheckBox2_cs_bin.Checked = JsonConfig.ConfigInstance.cs_bin;
             airCheckBox3bin_cs.Checked = JsonConfig.ConfigInstance.bin_cs;
-            airCheckBox6Protobuf_bin.Checked =JsonConfig.ConfigInstance.protobuf_bin;
-            airCheckBox4Protobuf_cs.Checked=JsonConfig.ConfigInstance.protobuf_cs;
+            airCheckBox6Protobuf_bin.Checked = JsonConfig.ConfigInstance.protobuf_bin;
+            airCheckBox4Protobuf_cs.Checked = JsonConfig.ConfigInstance.protobuf_cs;
 
             aloneTextBox1Luban.Text = JsonConfig.ConfigInstance.LubanPath;
             aloneTextBox2Data.Text = JsonConfig.ConfigInstance.DataPath;
@@ -123,6 +120,7 @@ namespace ExcelDataExport
                     excelListBox.Items.Add(Path.GetFileName(item));
                 }
             }
+            dungeonRichTextBox1ToolTips.Text = "1.protobuf 不支持中文路径，不支持注释";
         }
 
 
@@ -257,8 +255,9 @@ namespace ExcelDataExport
             JsonConfig.ConfigInstance.SaveConfig();
         }
 
-   
+        private void excelListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
 
-      
+        }
     }
 }

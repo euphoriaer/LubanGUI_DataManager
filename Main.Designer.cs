@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
             airTabPage1 = new ReaLTaiizor.Controls.AirTabPage();
             tabPage1 = new TabPage();
             parrotToolStrip1 = new ReaLTaiizor.Controls.ParrotToolStrip();
@@ -57,20 +56,25 @@
             aloneTextBox3Script = new ReaLTaiizor.Controls.AloneTextBox();
             aloneTextBox2Data = new ReaLTaiizor.Controls.AloneTextBox();
             aloneTextBox1Luban = new ReaLTaiizor.Controls.AloneTextBox();
+            tabPage2 = new TabPage();
+            dungeonRichTextBox1ToolTips = new ReaLTaiizor.Controls.DungeonRichTextBox();
             airForm1 = new ReaLTaiizor.Forms.AirForm();
             airTabPage1.SuspendLayout();
             tabPage1.SuspendLayout();
             parrotToolStrip1.SuspendLayout();
             设置.SuspendLayout();
+            tabPage2.SuspendLayout();
             airForm1.SuspendLayout();
             SuspendLayout();
             // 
             // airTabPage1
             // 
             airTabPage1.Alignment = TabAlignment.Left;
+            airTabPage1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             airTabPage1.BaseColor = Color.White;
             airTabPage1.Controls.Add(tabPage1);
             airTabPage1.Controls.Add(设置);
+            airTabPage1.Controls.Add(tabPage2);
             airTabPage1.ItemSize = new Size(30, 115);
             airTabPage1.Location = new Point(3, 34);
             airTabPage1.Multiline = true;
@@ -100,8 +104,10 @@
             // 
             // parrotToolStrip1
             // 
+            parrotToolStrip1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             parrotToolStrip1.BackColor = Color.White;
             parrotToolStrip1.BorderColor = Color.DodgerBlue;
+            parrotToolStrip1.Dock = DockStyle.None;
             parrotToolStrip1.ForeColor = Color.Black;
             parrotToolStrip1.GripStyle = ToolStripGripStyle.Hidden;
             parrotToolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButton1, toolStripSeparator1, toolStripProgressBar1 });
@@ -109,13 +115,12 @@
             parrotToolStrip1.Name = "parrotToolStrip1";
             parrotToolStrip1.RenderMode = ToolStripRenderMode.System;
             parrotToolStrip1.RightToLeft = RightToLeft.No;
-            parrotToolStrip1.Size = new Size(665, 40);
+            parrotToolStrip1.Size = new Size(171, 40);
             parrotToolStrip1.TabIndex = 1;
             parrotToolStrip1.Text = "parrotToolStrip1";
             // 
             // toolStripButton1
             // 
-            toolStripButton1.Image = (Image)resources.GetObject("toolStripButton1.Image");
             toolStripButton1.ImageTransparentColor = Color.Magenta;
             toolStripButton1.Name = "toolStripButton1";
             toolStripButton1.Size = new Size(60, 37);
@@ -135,6 +140,7 @@
             // 
             // excelListBox
             // 
+            excelListBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             excelListBox.DrawMode = DrawMode.OwnerDrawFixed;
             excelListBox.Font = new Font("Microsoft Sans Serif", 11F);
             excelListBox.FormattingEnabled = true;
@@ -142,7 +148,7 @@
             excelListBox.ItemHeight = 18;
             excelListBox.Location = new Point(0, 46);
             excelListBox.Name = "excelListBox";
-            excelListBox.Size = new Size(668, 531);
+            excelListBox.Size = new Size(668, 506);
             excelListBox.TabIndex = 0;
             // 
             // 设置
@@ -467,6 +473,34 @@
             aloneTextBox1Luban.TextAlign = HorizontalAlignment.Left;
             aloneTextBox1Luban.UseSystemPasswordChar = false;
             // 
+            // tabPage2
+            // 
+            tabPage2.BackColor = Color.White;
+            tabPage2.Controls.Add(dungeonRichTextBox1ToolTips);
+            tabPage2.Location = new Point(119, 4);
+            tabPage2.Name = "tabPage2";
+            tabPage2.Padding = new Padding(3);
+            tabPage2.Size = new Size(671, 555);
+            tabPage2.TabIndex = 2;
+            tabPage2.Text = "工具提示";
+            // 
+            // dungeonRichTextBox1ToolTips
+            // 
+            dungeonRichTextBox1ToolTips.AutoWordSelection = false;
+            dungeonRichTextBox1ToolTips.BackColor = Color.Transparent;
+            dungeonRichTextBox1ToolTips.BorderColor = Color.FromArgb(180, 180, 180);
+            dungeonRichTextBox1ToolTips.EdgeColor = Color.White;
+            dungeonRichTextBox1ToolTips.Font = new Font("Tahoma", 10F);
+            dungeonRichTextBox1ToolTips.ForeColor = Color.FromArgb(76, 76, 76);
+            dungeonRichTextBox1ToolTips.Location = new Point(0, 3);
+            dungeonRichTextBox1ToolTips.Name = "dungeonRichTextBox1ToolTips";
+            dungeonRichTextBox1ToolTips.ReadOnly = false;
+            dungeonRichTextBox1ToolTips.Size = new Size(665, 497);
+            dungeonRichTextBox1ToolTips.TabIndex = 0;
+            dungeonRichTextBox1ToolTips.Text = "1.protobuf,不支持中文路径";
+            dungeonRichTextBox1ToolTips.TextBackColor = Color.White;
+            dungeonRichTextBox1ToolTips.WordWrap = true;
+            // 
             // airForm1
             // 
             airForm1.BackColor = Color.White;
@@ -509,6 +543,7 @@
             parrotToolStrip1.PerformLayout();
             设置.ResumeLayout(false);
             设置.PerformLayout();
+            tabPage2.ResumeLayout(false);
             airForm1.ResumeLayout(false);
             ResumeLayout(false);
         }
@@ -544,5 +579,7 @@
         private ReaLTaiizor.Controls.AloneTextBox aloneTextBox1LubanConfig;
         private ReaLTaiizor.Controls.AloneButton aloneButton5ProtoBuf;
         private ReaLTaiizor.Controls.AloneTextBox aloneTextBox1ProtoBufPath;
+        private TabPage tabPage2;
+        private ReaLTaiizor.Controls.DungeonRichTextBox dungeonRichTextBox1ToolTips;
     }
 }
