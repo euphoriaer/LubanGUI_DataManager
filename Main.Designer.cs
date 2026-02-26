@@ -37,6 +37,8 @@
             toolStripProgressBar1 = new ToolStripProgressBar();
             excelListBox = new ReaLTaiizor.Controls.DungeonListBox();
             设置 = new TabPage();
+            aloneButton5Luban_Config = new ReaLTaiizor.Controls.AloneButton();
+            aloneTextBox1LubanConfig = new ReaLTaiizor.Controls.AloneTextBox();
             aloneButton4 = new ReaLTaiizor.Controls.AloneButton();
             aloneTextBox1Excel = new ReaLTaiizor.Controls.AloneTextBox();
             airCheckBox6 = new ReaLTaiizor.Controls.AirCheckBox();
@@ -54,8 +56,6 @@
             aloneTextBox2Data = new ReaLTaiizor.Controls.AloneTextBox();
             aloneTextBox1Luban = new ReaLTaiizor.Controls.AloneTextBox();
             airForm1 = new ReaLTaiizor.Forms.AirForm();
-            aloneTextBox1LubanConfig = new ReaLTaiizor.Controls.AloneTextBox();
-            aloneButton5Luban_Config = new ReaLTaiizor.Controls.AloneButton();
             airTabPage1.SuspendLayout();
             tabPage1.SuspendLayout();
             parrotToolStrip1.SuspendLayout();
@@ -170,6 +170,36 @@
             设置.Size = new Size(671, 555);
             设置.TabIndex = 1;
             设置.Text = "设置";
+            // 
+            // aloneButton5Luban_Config
+            // 
+            aloneButton5Luban_Config.BackColor = Color.Transparent;
+            aloneButton5Luban_Config.EnabledCalc = true;
+            aloneButton5Luban_Config.Font = new Font("Segoe UI", 9F);
+            aloneButton5Luban_Config.ForeColor = Color.FromArgb(124, 133, 142);
+            aloneButton5Luban_Config.Location = new Point(447, 282);
+            aloneButton5Luban_Config.Name = "aloneButton5Luban_Config";
+            aloneButton5Luban_Config.Size = new Size(105, 28);
+            aloneButton5Luban_Config.TabIndex = 17;
+            aloneButton5Luban_Config.Text = "luban配置路径";
+            aloneButton5Luban_Config.Click += aloneButton5Luban_Config_Click;
+            // 
+            // aloneTextBox1LubanConfig
+            // 
+            aloneTextBox1LubanConfig.BackColor = Color.Transparent;
+            aloneTextBox1LubanConfig.EnabledCalc = true;
+            aloneTextBox1LubanConfig.Font = new Font("Segoe UI", 9F);
+            aloneTextBox1LubanConfig.ForeColor = Color.FromArgb(124, 133, 142);
+            aloneTextBox1LubanConfig.Location = new Point(8, 269);
+            aloneTextBox1LubanConfig.MaxLength = 32767;
+            aloneTextBox1LubanConfig.MultiLine = false;
+            aloneTextBox1LubanConfig.Name = "aloneTextBox1LubanConfig";
+            aloneTextBox1LubanConfig.ReadOnly = false;
+            aloneTextBox1LubanConfig.Size = new Size(433, 53);
+            aloneTextBox1LubanConfig.TabIndex = 16;
+            aloneTextBox1LubanConfig.Text = "aloneTextBox1";
+            aloneTextBox1LubanConfig.TextAlign = HorizontalAlignment.Left;
+            aloneTextBox1LubanConfig.UseSystemPasswordChar = false;
             // 
             // aloneButton4
             // 
@@ -423,36 +453,6 @@
             airForm1.Text = "Excel";
             airForm1.TransparencyKey = Color.Empty;
             airForm1.Transparent = false;
-            // 
-            // aloneTextBox1LubanConfig
-            // 
-            aloneTextBox1LubanConfig.BackColor = Color.Transparent;
-            aloneTextBox1LubanConfig.EnabledCalc = true;
-            aloneTextBox1LubanConfig.Font = new Font("Segoe UI", 9F);
-            aloneTextBox1LubanConfig.ForeColor = Color.FromArgb(124, 133, 142);
-            aloneTextBox1LubanConfig.Location = new Point(8, 269);
-            aloneTextBox1LubanConfig.MaxLength = 32767;
-            aloneTextBox1LubanConfig.MultiLine = false;
-            aloneTextBox1LubanConfig.Name = "aloneTextBox1LubanConfig";
-            aloneTextBox1LubanConfig.ReadOnly = false;
-            aloneTextBox1LubanConfig.Size = new Size(433, 53);
-            aloneTextBox1LubanConfig.TabIndex = 16;
-            aloneTextBox1LubanConfig.Text = "aloneTextBox1";
-            aloneTextBox1LubanConfig.TextAlign = HorizontalAlignment.Left;
-            aloneTextBox1LubanConfig.UseSystemPasswordChar = false;
-            // 
-            // aloneButton5Luban_Config
-            // 
-            aloneButton5Luban_Config.BackColor = Color.Transparent;
-            aloneButton5Luban_Config.EnabledCalc = true;
-            aloneButton5Luban_Config.Font = new Font("Segoe UI", 9F);
-            aloneButton5Luban_Config.ForeColor = Color.FromArgb(124, 133, 142);
-            aloneButton5Luban_Config.Location = new Point(447, 282);
-            aloneButton5Luban_Config.Name = "aloneButton5Luban_Config";
-            aloneButton5Luban_Config.Size = new Size(105, 28);
-            aloneButton5Luban_Config.TabIndex = 17;
-            aloneButton5Luban_Config.Text = "luban配置路径";
-            aloneButton5Luban_Config.Click += aloneButton5Luban_Config_Click;
             // 
             // Main
             // 

@@ -18,7 +18,7 @@ namespace ExcelDataExport
             var jsonConfigFile = Path.Combine(curExePath, "LubanDataManagerConfig.Json");
             if (!File.Exists(jsonConfigFile))
             {
-                MessageBox.Show("ÇëÅäÖÃµ¼³öÂ·¾¶");
+                MessageBox.Show("è¯·é…ç½®å¯¼å‡ºè·¯å¾„");
                 JsonConfig.ConfigInstance = new JsonConfig(jsonConfigFile);
             }
             else
