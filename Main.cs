@@ -85,15 +85,34 @@ namespace ExcelDataExport
             RefreshSetting();
         }
 
+        private void aloneButton5ProtoBuf_Click(object sender, EventArgs e)
+        {
+            string path = DialogTools.OpenFiles(out var isok).First();
+            if (!isok)
+            {
+                return;
+            }
+            string baseDir = Path.GetDirectoryName(Application.ExecutablePath);
+            string relativePath = Path.GetRelativePath(baseDir, path);
+            JsonConfig.ConfigInstance.ProtoBufPathRelative = relativePath;
+            JsonConfig.ConfigInstance.SaveConfig();
+            aloneTextBox1ProtoBufPath.Text = JsonConfig.ConfigInstance.ProtoBufPath;
+            RefreshSetting();
+        }
+
         internal void RefreshSetting()
         {
             airCheckBox2_cs_bin.Checked = JsonConfig.ConfigInstance.cs_bin;
             airCheckBox3bin_cs.Checked = JsonConfig.ConfigInstance.bin_cs;
+            airCheckBox6Protobuf_bin.Checked =JsonConfig.ConfigInstance.protobuf_bin;
+            airCheckBox4Protobuf_cs.Checked=JsonConfig.ConfigInstance.protobuf_cs;
+
             aloneTextBox1Luban.Text = JsonConfig.ConfigInstance.LubanPath;
             aloneTextBox2Data.Text = JsonConfig.ConfigInstance.DataPath;
             aloneTextBox3Script.Text = JsonConfig.ConfigInstance.ScriptsPath;
             aloneTextBox1Excel.Text = JsonConfig.ConfigInstance.ExcelsPath;
             aloneTextBox1LubanConfig.Text = JsonConfig.ConfigInstance.LubanConfigPath;
+            aloneTextBox1ProtoBufPath.Text = JsonConfig.ConfigInstance.ProtoBufPath;
             //excel 文件夹存在
             if (!string.IsNullOrEmpty(JsonConfig.ConfigInstance.ExcelsPath))
             {
@@ -106,8 +125,8 @@ namespace ExcelDataExport
             }
         }
 
- 
-        private async void  ExportAllExcel_Click(object sender, EventArgs e)
+
+        private async void ExportAllExcel_Click(object sender, EventArgs e)
         {
 
 
@@ -131,19 +150,34 @@ namespace ExcelDataExport
             if (JsonConfig.ConfigInstance.bin_cs)
             {
                 lubanArguments += $"-d bin ";
-                lubanArguments += $"-x bin.outputDataDir={JsonConfig.ConfigInstance.DataPath}/bin \n";
+                lubanArguments += $"-x bin.outputDataDir={JsonConfig.ConfigInstance.DataPath}/bin ";
             }
 
+            if (JsonConfig.ConfigInstance.protobuf_bin)
+            {
+                lubanArguments += $"-d protobuf3-bin ";
+                lubanArguments += $"-x protobuf3-bin.outputDataDir={JsonConfig.ConfigInstance.DataPath}/protobuf3_bin ";
+            }
+
+            if (JsonConfig.ConfigInstance.protobuf_cs)
+            {
+                lubanArguments += $"-c protobuf3 ";
+                lubanArguments += $"-c cs-protobuf3 ";
+                lubanArguments += $"-x protobuf3.outputCodeDir={JsonConfig.ConfigInstance.ScriptsPath}/protobuf3 ";
+                lubanArguments += $"-x cs-protobuf3.outputCodeDir={JsonConfig.ConfigInstance.ScriptsPath}/cs_protobuf3 ";
+            }
+
+            lubanArguments += "\n";
+            Process process = new Process();
+            process.StartInfo.FileName = "cmd.exe";
+            //process.StartInfo.Arguments = lubanArguments;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardInput = true;
+            process.StartInfo.RedirectStandardOutput = false;
+            process.StartInfo.CreateNoWindow = false; // 隐藏 CMD 窗口
             try
             {
                 // 创建 Process 对象
-                Process process = new Process();
-                process.StartInfo.FileName = "cmd.exe";
-                //process.StartInfo.Arguments = lubanArguments;
-                process.StartInfo.UseShellExecute = false;
-                process.StartInfo.RedirectStandardInput = true;
-                process.StartInfo.RedirectStandardOutput = false;
-                process.StartInfo.CreateNoWindow = false; // 隐藏 CMD 窗口
 
                 // 启动进程
                 process.Start();
@@ -154,7 +188,6 @@ namespace ExcelDataExport
                 process.StandardInput.WriteLine(lubanArguments);
                 // 获取输出结果
                 //string output = process.StandardOutput.ReadToEnd();
-                Console.WriteLine("CMD 输出结果：");
                 //Console.WriteLine(output);
 
                 // 等待进程结束
@@ -164,9 +197,41 @@ namespace ExcelDataExport
             {
                 Console.WriteLine($"发生错误: {ex.Message}");
             }
+            process.WaitForExit();
+            if (JsonConfig.ConfigInstance.protobuf_cs)
+            {
+                //调用proto 生成代码
+                var path = $"{JsonConfig.ConfigInstance.ScriptsPath}/protobuf3";
+                var protoFiles = Directory.GetFiles(path);
+                foreach (var item in protoFiles)
+                {
+                    var thisProtoPath = item;
 
 
+                    Process process2 = new Process();
+                    process2.StartInfo.FileName = "cmd.exe";
+                    //process.StartInfo.Arguments = lubanArguments;
+                    process2.StartInfo.UseShellExecute = false;
+                    process2.StartInfo.RedirectStandardInput = true;
+                    process2.StartInfo.RedirectStandardOutput = false;
+                    process2.StartInfo.CreateNoWindow = false; // 隐藏 CMD 窗口
+                    try
+                    {
+                        // 创建 Process 对象
+
+                        // 启动进程
+                        process2.Start();
+                        var protoArguments = $"{JsonConfig.ConfigInstance.ProtoBufPath} --csharp_out={JsonConfig.ConfigInstance.ScriptsPath}/protobuf3 --proto_path={path} {Path.GetFileName(item)}\n";
+                        process2.StandardInput.WriteLine(protoArguments);
+                    }
+                    catch
+                    {
+                    }
+
+                }
+            }
         }
+
 
         private void airCheckBox2_CheckedChanged(object sender)
         {
@@ -180,6 +245,20 @@ namespace ExcelDataExport
             JsonConfig.ConfigInstance.SaveConfig();
         }
 
-     
+        private void airCheckBox6_CheckedChanged(object sender)
+        {
+            JsonConfig.ConfigInstance.protobuf_bin = airCheckBox6Protobuf_bin.Checked;
+            JsonConfig.ConfigInstance.SaveConfig();
+        }
+
+        private void airCheckBox4_CheckedChanged(object sender)
+        {
+            JsonConfig.ConfigInstance.protobuf_cs = airCheckBox4Protobuf_cs.Checked;
+            JsonConfig.ConfigInstance.SaveConfig();
+        }
+
+   
+
+      
     }
 }

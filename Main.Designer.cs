@@ -37,13 +37,15 @@
             toolStripProgressBar1 = new ToolStripProgressBar();
             excelListBox = new ReaLTaiizor.Controls.DungeonListBox();
             设置 = new TabPage();
+            aloneButton5ProtoBuf = new ReaLTaiizor.Controls.AloneButton();
+            aloneTextBox1ProtoBufPath = new ReaLTaiizor.Controls.AloneTextBox();
             aloneButton5Luban_Config = new ReaLTaiizor.Controls.AloneButton();
             aloneTextBox1LubanConfig = new ReaLTaiizor.Controls.AloneTextBox();
             aloneButton4 = new ReaLTaiizor.Controls.AloneButton();
             aloneTextBox1Excel = new ReaLTaiizor.Controls.AloneTextBox();
-            airCheckBox6 = new ReaLTaiizor.Controls.AirCheckBox();
+            airCheckBox6Protobuf_bin = new ReaLTaiizor.Controls.AirCheckBox();
             airCheckBox5 = new ReaLTaiizor.Controls.AirCheckBox();
-            airCheckBox4 = new ReaLTaiizor.Controls.AirCheckBox();
+            airCheckBox4Protobuf_cs = new ReaLTaiizor.Controls.AirCheckBox();
             airCheckBox3bin_cs = new ReaLTaiizor.Controls.AirCheckBox();
             dungeonLabel2 = new ReaLTaiizor.Controls.DungeonLabel();
             dungeonLabel1 = new ReaLTaiizor.Controls.DungeonLabel();
@@ -146,13 +148,15 @@
             // 设置
             // 
             设置.BackColor = Color.White;
+            设置.Controls.Add(aloneButton5ProtoBuf);
+            设置.Controls.Add(aloneTextBox1ProtoBufPath);
             设置.Controls.Add(aloneButton5Luban_Config);
             设置.Controls.Add(aloneTextBox1LubanConfig);
             设置.Controls.Add(aloneButton4);
             设置.Controls.Add(aloneTextBox1Excel);
-            设置.Controls.Add(airCheckBox6);
+            设置.Controls.Add(airCheckBox6Protobuf_bin);
             设置.Controls.Add(airCheckBox5);
-            设置.Controls.Add(airCheckBox4);
+            设置.Controls.Add(airCheckBox4Protobuf_cs);
             设置.Controls.Add(airCheckBox3bin_cs);
             设置.Controls.Add(dungeonLabel2);
             设置.Controls.Add(dungeonLabel1);
@@ -170,6 +174,36 @@
             设置.Size = new Size(671, 555);
             设置.TabIndex = 1;
             设置.Text = "设置";
+            // 
+            // aloneButton5ProtoBuf
+            // 
+            aloneButton5ProtoBuf.BackColor = Color.Transparent;
+            aloneButton5ProtoBuf.EnabledCalc = true;
+            aloneButton5ProtoBuf.Font = new Font("Segoe UI", 9F);
+            aloneButton5ProtoBuf.ForeColor = Color.FromArgb(124, 133, 142);
+            aloneButton5ProtoBuf.Location = new Point(445, 341);
+            aloneButton5ProtoBuf.Name = "aloneButton5ProtoBuf";
+            aloneButton5ProtoBuf.Size = new Size(105, 28);
+            aloneButton5ProtoBuf.TabIndex = 19;
+            aloneButton5ProtoBuf.Text = "protobuf.exe路径";
+            aloneButton5ProtoBuf.Click += aloneButton5ProtoBuf_Click;
+            // 
+            // aloneTextBox1ProtoBufPath
+            // 
+            aloneTextBox1ProtoBufPath.BackColor = Color.Transparent;
+            aloneTextBox1ProtoBufPath.EnabledCalc = true;
+            aloneTextBox1ProtoBufPath.Font = new Font("Segoe UI", 9F);
+            aloneTextBox1ProtoBufPath.ForeColor = Color.FromArgb(124, 133, 142);
+            aloneTextBox1ProtoBufPath.Location = new Point(6, 328);
+            aloneTextBox1ProtoBufPath.MaxLength = 32767;
+            aloneTextBox1ProtoBufPath.MultiLine = false;
+            aloneTextBox1ProtoBufPath.Name = "aloneTextBox1ProtoBufPath";
+            aloneTextBox1ProtoBufPath.ReadOnly = false;
+            aloneTextBox1ProtoBufPath.Size = new Size(433, 53);
+            aloneTextBox1ProtoBufPath.TabIndex = 18;
+            aloneTextBox1ProtoBufPath.Text = "aloneTextBox1";
+            aloneTextBox1ProtoBufPath.TextAlign = HorizontalAlignment.Left;
+            aloneTextBox1ProtoBufPath.UseSystemPasswordChar = false;
             // 
             // aloneButton5Luban_Config
             // 
@@ -231,19 +265,20 @@
             aloneTextBox1Excel.TextAlign = HorizontalAlignment.Left;
             aloneTextBox1Excel.UseSystemPasswordChar = false;
             // 
-            // airCheckBox6
+            // airCheckBox6Protobuf_bin
             // 
-            airCheckBox6.Checked = false;
-            airCheckBox6.Customization = "7e3t//Ly8v/r6+v/5ubm/+vr6//f39//p6en/zw8PP8=";
-            airCheckBox6.Font = new Font("Segoe UI", 9F);
-            airCheckBox6.Image = null;
-            airCheckBox6.Location = new Point(11, 495);
-            airCheckBox6.Name = "airCheckBox6";
-            airCheckBox6.NoRounding = false;
-            airCheckBox6.Size = new Size(92, 17);
-            airCheckBox6.TabIndex = 13;
-            airCheckBox6.Text = "protobuf3";
-            airCheckBox6.Transparent = false;
+            airCheckBox6Protobuf_bin.Checked = false;
+            airCheckBox6Protobuf_bin.Customization = "7e3t//Ly8v/r6+v/5ubm/+vr6//f39//p6en/zw8PP8=";
+            airCheckBox6Protobuf_bin.Font = new Font("Segoe UI", 9F);
+            airCheckBox6Protobuf_bin.Image = null;
+            airCheckBox6Protobuf_bin.Location = new Point(11, 495);
+            airCheckBox6Protobuf_bin.Name = "airCheckBox6Protobuf_bin";
+            airCheckBox6Protobuf_bin.NoRounding = false;
+            airCheckBox6Protobuf_bin.Size = new Size(92, 17);
+            airCheckBox6Protobuf_bin.TabIndex = 13;
+            airCheckBox6Protobuf_bin.Text = "protobuf3";
+            airCheckBox6Protobuf_bin.Transparent = false;
+            airCheckBox6Protobuf_bin.CheckedChanged += airCheckBox6_CheckedChanged;
             // 
             // airCheckBox5
             // 
@@ -259,19 +294,20 @@
             airCheckBox5.Text = "json-cs";
             airCheckBox5.Transparent = false;
             // 
-            // airCheckBox4
+            // airCheckBox4Protobuf_cs
             // 
-            airCheckBox4.Checked = false;
-            airCheckBox4.Customization = "7e3t//Ly8v/r6+v/5ubm/+vr6//f39//p6en/zw8PP8=";
-            airCheckBox4.Font = new Font("Segoe UI", 9F);
-            airCheckBox4.Image = null;
-            airCheckBox4.Location = new Point(160, 495);
-            airCheckBox4.Name = "airCheckBox4";
-            airCheckBox4.NoRounding = false;
-            airCheckBox4.Size = new Size(92, 17);
-            airCheckBox4.TabIndex = 11;
-            airCheckBox4.Text = "protobuf3-cs";
-            airCheckBox4.Transparent = false;
+            airCheckBox4Protobuf_cs.Checked = false;
+            airCheckBox4Protobuf_cs.Customization = "7e3t//Ly8v/r6+v/5ubm/+vr6//f39//p6en/zw8PP8=";
+            airCheckBox4Protobuf_cs.Font = new Font("Segoe UI", 9F);
+            airCheckBox4Protobuf_cs.Image = null;
+            airCheckBox4Protobuf_cs.Location = new Point(160, 495);
+            airCheckBox4Protobuf_cs.Name = "airCheckBox4Protobuf_cs";
+            airCheckBox4Protobuf_cs.NoRounding = false;
+            airCheckBox4Protobuf_cs.Size = new Size(92, 17);
+            airCheckBox4Protobuf_cs.TabIndex = 11;
+            airCheckBox4Protobuf_cs.Text = "protobuf3-cs";
+            airCheckBox4Protobuf_cs.Transparent = false;
+            airCheckBox4Protobuf_cs.CheckedChanged += airCheckBox4_CheckedChanged;
             // 
             // airCheckBox3bin_cs
             // 
@@ -494,9 +530,9 @@
         private ToolStripButton toolStripButton1;
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripProgressBar toolStripProgressBar1;
-        private ReaLTaiizor.Controls.AirCheckBox airCheckBox6;
+        private ReaLTaiizor.Controls.AirCheckBox airCheckBox6Protobuf_bin;
         private ReaLTaiizor.Controls.AirCheckBox airCheckBox5;
-        private ReaLTaiizor.Controls.AirCheckBox airCheckBox4;
+        private ReaLTaiizor.Controls.AirCheckBox airCheckBox4Protobuf_cs;
         private ReaLTaiizor.Controls.AirCheckBox airCheckBox3bin_cs;
         private ReaLTaiizor.Controls.DungeonLabel dungeonLabel2;
         private ReaLTaiizor.Controls.DungeonLabel dungeonLabel1;
@@ -506,5 +542,7 @@
         private ReaLTaiizor.Controls.AloneTextBox aloneTextBox1Excel;
         private ReaLTaiizor.Controls.AloneButton aloneButton5Luban_Config;
         private ReaLTaiizor.Controls.AloneTextBox aloneTextBox1LubanConfig;
+        private ReaLTaiizor.Controls.AloneButton aloneButton5ProtoBuf;
+        private ReaLTaiizor.Controls.AloneTextBox aloneTextBox1ProtoBufPath;
     }
 }

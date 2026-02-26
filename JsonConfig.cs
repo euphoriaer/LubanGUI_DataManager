@@ -41,6 +41,17 @@ namespace ExcelDataExport
             }
         }
 
+        public string ProtoBufPathRelative { get; set; } = "";
+        [JsonIgnore]
+        public string ProtoBufPath
+        {
+            get
+            {
+                string baseDir = Path.GetDirectoryName(Application.ExecutablePath);
+                return Path.GetFullPath(Path.Combine(baseDir, ProtoBufPathRelative));
+            }
+        }
+
 
         [JsonIgnore]
         public string DataPath
@@ -79,6 +90,10 @@ namespace ExcelDataExport
         public bool cs_bin { get; set; }
 
         public bool bin_cs { get; set; }
+
+        public bool protobuf_bin { get; set; }
+        public bool protobuf_cs { get; set; }
+
 
         public void SaveConfig()
         {
