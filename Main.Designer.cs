@@ -32,7 +32,6 @@
             tabPage1 = new TabPage();
             parrotToolStrip1 = new ReaLTaiizor.Controls.ParrotToolStrip();
             toolStripButton1 = new ToolStripButton();
-            toolStripSeparator1 = new ToolStripSeparator();
             toolStripProgressBar1 = new ToolStripProgressBar();
             excelListBox = new ReaLTaiizor.Controls.DungeonListBox();
             设置 = new TabPage();
@@ -110,12 +109,12 @@
             parrotToolStrip1.Dock = DockStyle.None;
             parrotToolStrip1.ForeColor = Color.Black;
             parrotToolStrip1.GripStyle = ToolStripGripStyle.Hidden;
-            parrotToolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButton1, toolStripSeparator1, toolStripProgressBar1 });
+            parrotToolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButton1, toolStripProgressBar1 });
             parrotToolStrip1.Location = new Point(3, 3);
             parrotToolStrip1.Name = "parrotToolStrip1";
             parrotToolStrip1.RenderMode = ToolStripRenderMode.System;
             parrotToolStrip1.RightToLeft = RightToLeft.No;
-            parrotToolStrip1.Size = new Size(171, 40);
+            parrotToolStrip1.Size = new Size(165, 40);
             parrotToolStrip1.TabIndex = 1;
             parrotToolStrip1.Text = "parrotToolStrip1";
             // 
@@ -127,11 +126,6 @@
             toolStripButton1.Text = "导出全部";
             toolStripButton1.TextImageRelation = TextImageRelation.ImageAboveText;
             toolStripButton1.Click += ExportAllExcel_Click;
-            // 
-            // toolStripSeparator1
-            // 
-            toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new Size(6, 40);
             // 
             // toolStripProgressBar1
             // 
@@ -563,7 +557,6 @@
         private ReaLTaiizor.Controls.DungeonListBox excelListBox;
         private ReaLTaiizor.Controls.ParrotToolStrip parrotToolStrip1;
         private ToolStripButton toolStripButton1;
-        private ToolStripSeparator toolStripSeparator1;
         private ToolStripProgressBar toolStripProgressBar1;
         private ReaLTaiizor.Controls.AirCheckBox airCheckBox6Protobuf_bin;
         private ReaLTaiizor.Controls.AirCheckBox airCheckBox5;
