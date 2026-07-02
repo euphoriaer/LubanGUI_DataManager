@@ -118,6 +118,10 @@ namespace ExcelDataExport
                         hit.Item.Selected = true;
                 }
             };
+
+            // ---- JSON 导出复选框事件 ----
+            airCheckBox1.CheckedChanged += AirCheckBox_JsonData_CheckedChanged;
+            airCheckBox5.CheckedChanged += AirCheckBox_JsonCS_CheckedChanged;
         }
 
         /// <summary>
@@ -294,6 +298,8 @@ namespace ExcelDataExport
 
         internal void RefreshSetting()
         {
+            airCheckBox1.Checked = JsonConfig.ConfigInstance.json_data;
+            airCheckBox5.Checked = JsonConfig.ConfigInstance.json_cs;
             airCheckBox2_cs_bin.Checked = JsonConfig.ConfigInstance.cs_bin;
             airCheckBox3bin_cs.Checked = JsonConfig.ConfigInstance.bin_cs;
             airCheckBox6Protobuf_bin.Checked = JsonConfig.ConfigInstance.protobuf_bin;
@@ -356,6 +362,18 @@ namespace ExcelDataExport
             argsBuilder.Append($"--conf \"{JsonConfig.ConfigInstance.LubanConfigPath}\" ");
             argsBuilder.Append("-t all ");
             argsBuilder.Append("-s default ");
+
+            if (JsonConfig.ConfigInstance.json_data)
+            {
+                argsBuilder.Append("-d json ");
+                argsBuilder.Append($"-x json.outputDataDir=\"{JsonConfig.ConfigInstance.DataPath}/json\" ");
+            }
+
+            if (JsonConfig.ConfigInstance.json_cs)
+            {
+                argsBuilder.Append("-c cs-unity-json ");
+                argsBuilder.Append($"-x cs-unity-json.outputCodeDir=\"{JsonConfig.ConfigInstance.ScriptsPath}/cs_json\" ");
+            }
 
             if (JsonConfig.ConfigInstance.cs_bin)
             {
@@ -465,6 +483,18 @@ namespace ExcelDataExport
         private void airCheckBox4_CheckedChanged(object sender)
         {
             JsonConfig.ConfigInstance.protobuf_cs = airCheckBox4Protobuf_cs.Checked;
+            JsonConfig.ConfigInstance.SaveConfig();
+        }
+
+        private void AirCheckBox_JsonData_CheckedChanged(object sender)
+        {
+            JsonConfig.ConfigInstance.json_data = airCheckBox1.Checked;
+            JsonConfig.ConfigInstance.SaveConfig();
+        }
+
+        private void AirCheckBox_JsonCS_CheckedChanged(object sender)
+        {
+            JsonConfig.ConfigInstance.json_cs = airCheckBox5.Checked;
             JsonConfig.ConfigInstance.SaveConfig();
         }
 

@@ -56,6 +56,10 @@ namespace ExcelDataExport
         public string ExcelsPath => ResolvePath(ExcelsPathRelative);
 
 
+        public bool json_data { get; set; }
+
+        public bool json_cs { get; set; }
+
         public bool cs_bin { get; set; }
 
         public bool bin_cs { get; set; }

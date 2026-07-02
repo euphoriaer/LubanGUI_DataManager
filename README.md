@@ -5,10 +5,12 @@
 ## 功能特性
 
 ### 📤 一键导出
+- 支持 **Json** 数据导出（`data_json`）
+- 支持 **json-cs**（C# 代码 + JSON 数据加载）
 - 支持 **cs-bin**（C# 代码 + 二进制数据）
-- 支持 **bin-cs**（二进制数据导入 + C# 加载代码）
-- 支持 **Protobuf3** 数据导出
-- 支持 **Protobuf3 → C#** 代码自动生成（调用 protoc）
+- 支持 **bin-cs**（二进制数据 + C# 加载代码）
+- 支持 **protobuf3** 数据导出
+- 支持 **protobuf3-cs**（Protobuf3 → C# 代码自动生成，调用 protoc）
 - 格式可自由组合勾选，配置自动持久化
 
 ### 📋 Excel 文件管理
