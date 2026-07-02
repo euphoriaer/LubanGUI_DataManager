@@ -33,7 +33,8 @@
             parrotToolStrip1 = new ReaLTaiizor.Controls.ParrotToolStrip();
             toolStripButton1 = new ToolStripButton();
             toolStripProgressBar1 = new ToolStripProgressBar();
-            excelListBox = new ReaLTaiizor.Controls.DungeonListBox();
+            excelListBox = new ListView();
+            columnHeader1 = new ColumnHeader();
             设置 = new TabPage();
             aloneButton5ProtoBuf = new ReaLTaiizor.Controls.AloneButton();
             aloneTextBox1ProtoBufPath = new ReaLTaiizor.Controls.AloneTextBox();
@@ -138,16 +139,26 @@
             // excelListBox
             // 
             excelListBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            excelListBox.DrawMode = DrawMode.OwnerDrawFixed;
-            excelListBox.Font = new Font("Microsoft Sans Serif", 11F);
-            excelListBox.FormattingEnabled = true;
-            excelListBox.IntegralHeight = false;
-            excelListBox.ItemHeight = 18;
+            excelListBox.BackColor = Color.White;
+            excelListBox.BorderStyle = BorderStyle.None;
+            excelListBox.Columns.AddRange(new ColumnHeader[] { columnHeader1 });
+            excelListBox.Font = new Font("Segoe UI", 11F);
+            excelListBox.FullRowSelect = true;
+            excelListBox.HeaderStyle = ColumnHeaderStyle.None;
             excelListBox.Location = new Point(0, 54);
             excelListBox.Margin = new Padding(4);
+            excelListBox.MultiSelect = false;
             excelListBox.Name = "excelListBox";
             excelListBox.Size = new Size(858, 595);
             excelListBox.TabIndex = 0;
+            excelListBox.UseCompatibleStateImageBehavior = false;
+            excelListBox.View = View.Details;
+            excelListBox.DoubleClick += excelListBox_DoubleClick;
+            // 
+            // columnHeader1
+            // 
+            columnHeader1.Text = "文件名";
+            columnHeader1.Width = 850;
             // 
             // 设置
             // 
@@ -588,7 +599,8 @@
         private ReaLTaiizor.Controls.AloneTextBox aloneTextBox2Data;
         private ReaLTaiizor.Controls.AloneTextBox aloneTextBox1Luban;
         private ReaLTaiizor.Forms.AirForm airForm1;
-        private ReaLTaiizor.Controls.DungeonListBox excelListBox;
+        private ListView excelListBox;
+        private ColumnHeader columnHeader1;
         private ReaLTaiizor.Controls.ParrotToolStrip parrotToolStrip1;
         private ToolStripButton toolStripButton1;
         private ToolStripProgressBar toolStripProgressBar1;

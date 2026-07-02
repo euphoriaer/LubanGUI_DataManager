@@ -8,6 +8,116 @@ namespace ExcelDataExport
         public Main()
         {
             InitializeComponent();
+            ApplyLayoutImprovements();
+        }
+
+        /// <summary>
+        /// 运行时布局美化：用 GroupBox 分组，让界面更整洁
+        /// </summary>
+        private void ApplyLayoutImprovements()
+        {
+            var tab = 设置;
+            if (tab == null) return;
+
+            // ---- GroupBox 1：路径设置 ----
+            var groupPaths = new GroupBox
+            {
+                Text = "  路径设置  ",
+                Location = new Point(3, 3),
+                Size = new Size(892, 445),
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                ForeColor = Color.FromArgb(78, 87, 100),
+                Parent = tab
+            };
+
+            // 将路径相关的 6 个 TextBox + 6 个 Button 移入 GroupBox
+            var pathRows = new[]
+            {
+                (TB: aloneTextBox1Excel,      BTN: (Control)aloneButton4),
+                (TB: aloneTextBox1Luban,      BTN: (Control)aloneButton1),
+                (TB: aloneTextBox2Data,       BTN: (Control)aloneButton2),
+                (TB: aloneTextBox3Script,     BTN: (Control)aloneButton3),
+                (TB: aloneTextBox1LubanConfig, BTN: (Control)aloneButton5Luban_Config),
+                (TB: aloneTextBox1ProtoBufPath, BTN: (Control)aloneButton5ProtoBuf),
+            };
+
+            foreach (var (TB, BTN) in pathRows)
+            {
+                // 先计算相对于 GroupBox 的坐标，再更换父容器
+                var tbLoc = new Point(TB.Left - groupPaths.Left, TB.Top - groupPaths.Top);
+                var btnLoc = new Point(BTN.Left - groupPaths.Left, BTN.Top - groupPaths.Top);
+
+                TB.Parent = groupPaths;
+                TB.Location = tbLoc;
+
+                BTN.Parent = groupPaths;
+                BTN.Location = btnLoc;
+            }
+
+            // ---- GroupBox 2：导出格式 ----
+            var groupFormats = new GroupBox
+            {
+                Text = "  导出格式  ",
+                Location = new Point(3, 452),
+                Size = new Size(892, 170),
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                ForeColor = Color.FromArgb(78, 87, 100),
+                Parent = tab
+            };
+
+            // 将 2 个 Label + 6 个 CheckBox 移入 GroupBox
+            var formatControls = new Control[]
+            {
+                dungeonLabel1, dungeonLabel2,
+                airCheckBox1, airCheckBox2_cs_bin, airCheckBox6Protobuf_bin,
+                airCheckBox5, airCheckBox3bin_cs, airCheckBox4Protobuf_cs,
+            };
+
+            foreach (var ctrl in formatControls)
+            {
+                // 先计算相对于 GroupBox 的坐标，再更换父容器
+                var loc = new Point(ctrl.Left - groupFormats.Left, ctrl.Top - groupFormats.Top);
+                ctrl.Parent = groupFormats;
+                ctrl.Location = loc;
+            }
+
+            // 调整窗体标题等美化
+            Text = "Luban 数据导出管理器";
+            airForm1.Text = "Luban 数据导出管理器";
+
+            // ---- 美化 Excel 文件列表 ----
+            // 失焦后仍然保留选中高亮
+            excelListBox.HideSelection = false;
+
+            // ---- 右键菜单 ----
+            var ctxMenu = new ContextMenuStrip();
+
+            var miOpen = ctxMenu.Items.Add("📂 打开");
+            miOpen.Click += (_, _) => OpenSelectedExcel();
+
+            ctxMenu.Items.Add(new ToolStripSeparator());
+
+            var miRename = ctxMenu.Items.Add("✏️ 重命名");
+            miRename.Click += (_, _) => RenameSelectedExcel();
+
+            var miDelete = ctxMenu.Items.Add("🗑️ 删除");
+            miDelete.Click += (_, _) => DeleteSelectedExcel();
+
+            ctxMenu.Items.Add(new ToolStripSeparator());
+
+            var miFolder = ctxMenu.Items.Add("📁 打开所在文件夹");
+            miFolder.Click += (_, _) => OpenSelectedFolder();
+
+            excelListBox.ContextMenuStrip = ctxMenu;
+            excelListBox.MouseDown += (_, args) =>
+            {
+                if (args.Button == MouseButtons.Right)
+                {
+                    var hit = excelListBox.HitTest(args.Location);
+                    if (hit.Item != null)
+                        hit.Item.Selected = true;
+                }
+            };
         }
 
         /// <summary>
@@ -356,6 +466,165 @@ namespace ExcelDataExport
         {
             JsonConfig.ConfigInstance.protobuf_cs = airCheckBox4Protobuf_cs.Checked;
             JsonConfig.ConfigInstance.SaveConfig();
+        }
+
+        // ---------------------------------------------------------------
+        // 获取当前选中文件的信息，未选中则返回 null
+        // ---------------------------------------------------------------
+        private (string FullPath, string FileName)? GetSelectedExcel()
+        {
+            if (excelListBox.SelectedItems.Count == 0) return null;
+
+            var name = excelListBox.SelectedItems[0].Text;
+            if (string.IsNullOrEmpty(name)) return null;
+
+            var fullPath = Path.Combine(JsonConfig.ConfigInstance.ExcelsPath, name);
+            if (!File.Exists(fullPath)) return null;
+
+            return (fullPath, name);
+        }
+
+        // ---------------------------------------------------------------
+        // 右键 / 双击 → 打开
+        // ---------------------------------------------------------------
+        private void OpenSelectedExcel()
+        {
+            var sel = GetSelectedExcel();
+            if (sel == null) return;
+            new ExcelViewer(sel.Value.FullPath, sel.Value.FileName).Show();
+        }
+
+        private void excelListBox_DoubleClick(object sender, EventArgs e)
+        {
+            OpenSelectedExcel();
+        }
+
+        // ---------------------------------------------------------------
+        // 右键 → 重命名
+        // ---------------------------------------------------------------
+        private void RenameSelectedExcel()
+        {
+            var sel = GetSelectedExcel();
+            if (sel == null) return;
+
+            var oldName = sel.Value.FileName;
+            var oldPath = sel.Value.FullPath;
+
+            // 弹出输入框
+            var inputForm = new Form
+            {
+                Text = "重命名文件",
+                Size = new Size(420, 160),
+                StartPosition = FormStartPosition.CenterParent,
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                MaximizeBox = false,
+                MinimizeBox = false,
+                ShowInTaskbar = false,
+            };
+
+            var lbl = new Label
+            {
+                Text = "请输入新文件名（保留 .xlsx 后缀）：",
+                Location = new Point(12, 16),
+                AutoSize = true,
+                Parent = inputForm,
+            };
+
+            var txt = new TextBox
+            {
+                Text = oldName,
+                Location = new Point(12, 42),
+                Size = new Size(380, 26),
+                Parent = inputForm,
+            };
+            txt.Select(0, Path.GetFileNameWithoutExtension(oldName).Length);
+
+            var btnOk = new Button
+            {
+                Text = "确定",
+                Size = new Size(80, 30),
+                Location = new Point(220, 80),
+                DialogResult = DialogResult.OK,
+                Parent = inputForm,
+            };
+
+            var btnCancel = new Button
+            {
+                Text = "取消",
+                Size = new Size(80, 30),
+                Location = new Point(310, 80),
+                DialogResult = DialogResult.Cancel,
+                Parent = inputForm,
+            };
+
+            inputForm.AcceptButton = btnOk;
+            inputForm.CancelButton = btnCancel;
+
+            if (inputForm.ShowDialog(this) != DialogResult.OK) return;
+
+            var newName = txt.Text.Trim();
+            if (string.IsNullOrEmpty(newName) || newName == oldName) return;
+            if (!newName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+                newName += ".xlsx";
+
+            var newPath = Path.Combine(JsonConfig.ConfigInstance.ExcelsPath, newName);
+
+            if (File.Exists(newPath))
+            {
+                MessageBox.Show($"文件 \"{newName}\" 已存在，不能覆盖。", "重命名失败",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                File.Move(oldPath, newPath);
+                RefreshSetting();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"重命名失败：{ex.Message}", "错误",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // ---------------------------------------------------------------
+        // 右键 → 删除
+        // ---------------------------------------------------------------
+        private void DeleteSelectedExcel()
+        {
+            var sel = GetSelectedExcel();
+            if (sel == null) return;
+
+            var result = MessageBox.Show(
+                $"确定要删除文件 \"{sel.Value.FileName}\" 吗？\n\n此操作不可撤销。",
+                "确认删除",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (result != DialogResult.Yes) return;
+
+            try
+            {
+                File.Delete(sel.Value.FullPath);
+                RefreshSetting();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"删除失败：{ex.Message}", "错误",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // ---------------------------------------------------------------
+        // 右键 → 打开所在文件夹
+        // ---------------------------------------------------------------
+        private void OpenSelectedFolder()
+        {
+            var sel = GetSelectedExcel();
+            if (sel == null) return;
+
+            Process.Start("explorer.exe", $"/select,\"{sel.Value.FullPath}\"");
         }
 
         private void excelListBox_SelectedIndexChanged(object sender, EventArgs e)
