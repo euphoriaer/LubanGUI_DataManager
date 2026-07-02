@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Windows.Forms;
 
 namespace ExcelDataExport
 {
@@ -20,71 +21,39 @@ namespace ExcelDataExport
         }
 
 
-        public string LubanPathRelative { get; set; } = "";
-        [JsonIgnore]
-        public string LubanPath
+        /// <summary>
+        /// 从 exe 目录解析相对路径为绝对路径
+        /// </summary>
+        private static string ResolvePath(string relativePath)
         {
-            get
-            {
-                string baseDir = Path.GetDirectoryName(Application.ExecutablePath);
-                return Path.GetFullPath(Path.Combine(baseDir, LubanPathRelative));
-            }
-        }
-        public string LubanConfigPathRelative { get; set; } = "";
-        [JsonIgnore]
-        public string LubanConfigPath
-        {
-            get
-            {
-                string baseDir = Path.GetDirectoryName(Application.ExecutablePath);
-                return Path.GetFullPath(Path.Combine(baseDir, LubanConfigPathRelative));
-            }
+            if (string.IsNullOrEmpty(relativePath)) return "";
+            string baseDir = Path.GetDirectoryName(Application.ExecutablePath);
+            return Path.GetFullPath(Path.Combine(baseDir, relativePath));
         }
 
-        public string ProtoBufPathRelative { get; set; } = "";
+        public string LubanPathRelative { get; set; } = "plugin/Luban";
         [JsonIgnore]
-        public string ProtoBufPath
-        {
-            get
-            {
-                string baseDir = Path.GetDirectoryName(Application.ExecutablePath);
-                return Path.GetFullPath(Path.Combine(baseDir, ProtoBufPathRelative));
-            }
-        }
+        public string LubanPath => ResolvePath(LubanPathRelative);
 
-
+        public string LubanConfigPathRelative { get; set; } = "plugin/excel_data/luban_config.json";
         [JsonIgnore]
-        public string DataPath
-        {
-            get
-            {
-                string baseDir = Path.GetDirectoryName(Application.ExecutablePath);
-                return Path.GetFullPath(Path.Combine(baseDir, DataPathRelative));
-            }
-        }
-        public string DataPathRelative { get; set; } = "";
-        [JsonIgnore]
-        public string ScriptsPath
-        {
-            get
-            {
-                string baseDir = Path.GetDirectoryName(Application.ExecutablePath);
-                return Path.GetFullPath(Path.Combine(baseDir, ScriptsPathRelative));
-            }
-        }
-        public string ScriptsPathRelative { get; set; } = "";
+        public string LubanConfigPath => ResolvePath(LubanConfigPathRelative);
 
-
+        public string ProtoBufPathRelative { get; set; } = "plugin/Luban/protoc.exe";
         [JsonIgnore]
-        public string ExcelsPath
-        {
-            get
-            {
-                string baseDir = Path.GetDirectoryName(Application.ExecutablePath);
-                return Path.GetFullPath(Path.Combine(baseDir, ExcelsPathRelative));
-            }
-        }
-        public string ExcelsPathRelative { get; set; } = "";
+        public string ProtoBufPath => ResolvePath(ProtoBufPathRelative);
+
+        public string DataPathRelative { get; set; } = "plugin/excel_data/output_data";
+        [JsonIgnore]
+        public string DataPath => ResolvePath(DataPathRelative);
+
+        public string ScriptsPathRelative { get; set; } = "plugin/proto_cs";
+        [JsonIgnore]
+        public string ScriptsPath => ResolvePath(ScriptsPathRelative);
+
+        public string ExcelsPathRelative { get; set; } = "plugin/excel_data/Datas";
+        [JsonIgnore]
+        public string ExcelsPath => ResolvePath(ExcelsPathRelative);
 
 
         public bool cs_bin { get; set; }
@@ -95,10 +64,42 @@ namespace ExcelDataExport
         public bool protobuf_cs { get; set; }
 
 
+        /// <summary>
+        /// 将空字符串的路径恢复为预设默认值（防止旧配置文件覆盖新默认值）
+        /// </summary>
+        public void EnsureDefaults()
+        {
+            if (string.IsNullOrEmpty(LubanPathRelative)) LubanPathRelative = "plugin/Luban";
+            if (string.IsNullOrEmpty(LubanConfigPathRelative)) LubanConfigPathRelative = "plugin/excel_data/luban_config.json";
+            if (string.IsNullOrEmpty(ProtoBufPathRelative)) ProtoBufPathRelative = "plugin/Luban/protoc.exe";
+            if (string.IsNullOrEmpty(DataPathRelative)) DataPathRelative = "plugin/excel_data/output_data";
+            if (string.IsNullOrEmpty(ScriptsPathRelative)) ScriptsPathRelative = "plugin/proto_cs";
+            if (string.IsNullOrEmpty(ExcelsPathRelative)) ExcelsPathRelative = "plugin/excel_data/Datas";
+        }
+
+
         public void SaveConfig()
         {
-            var fileStr = JsonConvert.SerializeObject(ConfigInstance, Formatting.Indented);
-            File.WriteAllText(configPath, fileStr);
+            if (string.IsNullOrEmpty(configPath))
+            {
+                return;
+            }
+
+            try
+            {
+                var dir = Path.GetDirectoryName(configPath);
+                if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+
+                var fileStr = JsonConvert.SerializeObject(ConfigInstance, Formatting.Indented);
+                File.WriteAllText(configPath, fileStr);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"保存配置文件失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

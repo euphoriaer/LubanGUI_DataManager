@@ -30,4 +30,9 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <!-- 将 plugin/ 目录下的所有文件复制到输出目录（Debug / Publish 均生效） -->
+  <ItemGroup>
+    <Content Include="plugin\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

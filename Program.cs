@@ -10,24 +10,42 @@ namespace ExcelDataExport
         [STAThread]
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
             var main = new Main();
             var curExePath = Path.GetDirectoryName(Application.ExecutablePath);
             var jsonConfigFile = Path.Combine(curExePath, "LubanDataManagerConfig.Json");
             if (!File.Exists(jsonConfigFile))
             {
-                MessageBox.Show("请配置导出路径");
                 JsonConfig.ConfigInstance = new JsonConfig(jsonConfigFile);
             }
             else
             {
-
-                var str = File.ReadAllText(jsonConfigFile);
-                JsonConfig.ConfigInstance = JsonConvert.DeserializeObject<JsonConfig>(str);
-                JsonConfig.ConfigInstance.configPath = jsonConfigFile;
-
+                try
+                {
+                    var str = File.ReadAllText(jsonConfigFile);
+                    if (!string.IsNullOrWhiteSpace(str))
+                    {
+                        var deserialized = JsonConvert.DeserializeObject<JsonConfig>(str);
+                        if (deserialized != null)
+                        {
+                            JsonConfig.ConfigInstance = deserialized;
+                            JsonConfig.ConfigInstance.configPath = jsonConfigFile;
+                            JsonConfig.ConfigInstance.EnsureDefaults(); // 旧配置文件的空路径→插件默认值
+                        }
+                        else
+                        {
+                            JsonConfig.ConfigInstance = new JsonConfig(jsonConfigFile);
+                        }
+                    }
+                    else
+                    {
+                        JsonConfig.ConfigInstance = new JsonConfig(jsonConfigFile);
+                    }
+                }
+                catch
+                {
+                    JsonConfig.ConfigInstance = new JsonConfig(jsonConfigFile);
+                }
             }
             main.RefreshSetting();
             Application.Run(main);
