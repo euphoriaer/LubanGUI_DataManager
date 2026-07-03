@@ -6,9 +6,7 @@ namespace ExcelDataExport
     public partial class Main : Form
     {
         private RichTextBox _logBox = null!;
-        private Panel _logPanel = null!;
-        private Form? _floatForm;
-        private bool _resizingLog;
+        private Form _logForm = null!;
 
         public Main()
         {
@@ -25,8 +23,8 @@ namespace ExcelDataExport
             SetupSettingsTab();
             // ====== 导出页：恢复简洁布局 ======
             SetupExportTab();
-            // ====== 右侧日志面板：可停靠 / 弹出 ======
-            SetupLogPanel();
+            // ====== 日志独立弹窗 ======
+            SetupLogWindow();
         }
 
         private void SetupSettingsTab()
@@ -34,53 +32,128 @@ namespace ExcelDataExport
             var tab = 设置;
             if (tab == null) return;
 
-            // ---- GroupBox 1：路径设置 ----
+            // ---- GroupBox 1：路径设置（水平拉伸，输入框自适应宽度）----
             var groupPaths = new GroupBox
             {
                 Text = "  路径设置  ",
                 Location = new Point(3, 3),
-                Size = new Size(892, 445),
+                Size = new Size(tab.Width - 6, 430),
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold),
                 ForeColor = Color.FromArgb(78, 87, 100),
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
                 Parent = tab
             };
 
-            // 将路径相关的 6 个 TextBox + 6 个 Button 移入 GroupBox
-            var pathRows = new[]
+            // 每行：TextBox + 浏览按钮 + 📁打开文件夹按钮
+            var pathRows = new (Control TB, Control BrowseBtn, string FolderGetter)[]
             {
-                (TB: aloneTextBox1Excel,      BTN: (Control)aloneButton4),
-                (TB: aloneTextBox1Luban,      BTN: (Control)aloneButton1),
-                (TB: aloneTextBox2Data,       BTN: (Control)aloneButton2),
-                (TB: aloneTextBox3Script,     BTN: (Control)aloneButton3),
-                (TB: aloneTextBox1LubanConfig, BTN: (Control)aloneButton5Luban_Config),
-                (TB: aloneTextBox1ProtoBufPath, BTN: (Control)aloneButton5ProtoBuf),
+                (aloneTextBox1Excel,      aloneButton4,              nameof(JsonConfig.ConfigInstance.ExcelsPath)),
+                (aloneTextBox1Luban,      aloneButton1,              nameof(JsonConfig.ConfigInstance.LubanPath)),
+                (aloneTextBox2Data,       aloneButton2,              nameof(JsonConfig.ConfigInstance.DataPath)),
+                (aloneTextBox3Script,     aloneButton3,              nameof(JsonConfig.ConfigInstance.ScriptsPath)),
+                (aloneTextBox1LubanConfig,aloneButton5Luban_Config,  nameof(JsonConfig.ConfigInstance.LubanConfigPath)),
+                (aloneTextBox1ProtoBufPath,aloneButton5ProtoBuf,     nameof(JsonConfig.ConfigInstance.ProtoBufPath)),
             };
 
-            foreach (var (TB, BTN) in pathRows)
+            // 整体布局常量
+            const int marginRight = 12;
+            const int btnGap = 5;
+            const int openBtnW = 30;
+            const int browseBtnW = 130;
+
+            foreach (var (TB, BrowseBtn, folderGetter) in pathRows)
             {
-                // 先计算相对于 GroupBox 的坐标，再更换父容器
-                var tbLoc = new Point(TB.Left - groupPaths.Left, TB.Top - groupPaths.Top);
-                var btnLoc = new Point(BTN.Left - groupPaths.Left, BTN.Top - groupPaths.Top);
+                int y = TB.Top - groupPaths.Top;
 
+                // ---- 输入框：锚左上，宽由 Resize 算 ----
                 TB.Parent = groupPaths;
-                TB.Location = tbLoc;
+                TB.Location = new Point(TB.Left - groupPaths.Left, y);
+                TB.Anchor = AnchorStyles.Top | AnchorStyles.Left;
 
-                BTN.Parent = groupPaths;
-                BTN.Location = btnLoc;
+                // ---- 浏览按钮：锚右上 ----
+                BrowseBtn.Parent = groupPaths;
+                BrowseBtn.Size = new Size(browseBtnW, BrowseBtn.Height);
+                // 初始位置：从右边算 openBtnW + gap + browseBtnW + margin
+                BrowseBtn.Location = new Point(
+                    groupPaths.Width - marginRight - openBtnW - btnGap - browseBtnW,
+                    y + (BrowseBtn.Top - groupPaths.Top - y));
+                BrowseBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+
+                // ---- 📁 按钮：锚右上 ----
+                var openBtn = new Button
+                {
+                    Text = "📁",
+                    Size = new Size(openBtnW, BrowseBtn.Height),
+                    // 初始位置：右边距 marginRight
+                    Location = new Point(groupPaths.Width - marginRight - openBtnW, BrowseBtn.Top),
+                    FlatStyle = FlatStyle.Flat,
+                    Font = new Font("Segoe UI", 8F),
+                    ForeColor = Color.FromArgb(124, 133, 142),
+                    BackColor = Color.Transparent,
+                    Cursor = Cursors.Hand,
+                    Parent = groupPaths,
+                    Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                };
+                openBtn.FlatAppearance.BorderSize = 0;
+                openBtn.Click += (_, _) =>
+                {
+                    var path = folderGetter switch
+                    {
+                        nameof(JsonConfig.ConfigInstance.ExcelsPath) => JsonConfig.ConfigInstance.ExcelsPath,
+                        nameof(JsonConfig.ConfigInstance.LubanPath) => JsonConfig.ConfigInstance.LubanPath,
+                        nameof(JsonConfig.ConfigInstance.DataPath) => JsonConfig.ConfigInstance.DataPath,
+                        nameof(JsonConfig.ConfigInstance.ScriptsPath) => JsonConfig.ConfigInstance.ScriptsPath,
+                        nameof(JsonConfig.ConfigInstance.LubanConfigPath) =>
+                            Path.GetDirectoryName(JsonConfig.ConfigInstance.LubanConfigPath) ?? "",
+                        nameof(JsonConfig.ConfigInstance.ProtoBufPath) =>
+                            Path.GetDirectoryName(JsonConfig.ConfigInstance.ProtoBufPath) ?? "",
+                        _ => "",
+                    };
+                    if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+                        Process.Start("explorer.exe", path);
+                    else if (!string.IsNullOrEmpty(path) && File.Exists(path))
+                        Process.Start("explorer.exe", $"/select,\"{path}\"");
+                };
             }
+
+            // GroupBox 拉伸时：输入框变宽，按钮自动跟右
+            groupPaths.Resize += (_, _) =>
+            {
+                int gbW = groupPaths.Width;
+                // 右侧被按钮占据的总宽度
+                int btnColW = marginRight + openBtnW + btnGap + browseBtnW + btnGap;
+                foreach (var (TB, _, _) in pathRows)
+                {
+                    TB.Width = Math.Max(200, gbW - TB.Left - btnColW);
+                }
+            };
+            groupPaths.PerformLayout();
+
+            // 初始加载时把输入框拉到正确宽度
+            // 延迟到窗体 Load 后，确保 GroupBox 锚点已生效拿到最终宽度
+            void FixTextBoxWidths()
+            {
+                int gbW = groupPaths.Width;
+                int btnColW = marginRight + openBtnW + btnGap + browseBtnW + btnGap;
+                foreach (var (TB, _, _) in pathRows)
+                    TB.Width = Math.Max(200, gbW - TB.Left - btnColW);
+            }
+
+            FixTextBoxWidths(); // 先立即试一次（尺寸可能已对）
+            Load += (_, _) => FixTextBoxWidths(); // Load 后锚点生效再来一次
 
             // ---- GroupBox 2：导出格式 ----
             var groupFormats = new GroupBox
             {
                 Text = "  导出格式  ",
-                Location = new Point(3, 452),
-                Size = new Size(892, 170),
+                Location = new Point(3, groupPaths.Bottom + 6),
+                Size = new Size(tab.Width - 6, 170),
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold),
                 ForeColor = Color.FromArgb(78, 87, 100),
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
                 Parent = tab
             };
 
-            // 将 2 个 Label + 6 个 CheckBox 移入 GroupBox
             var formatControls = new Control[]
             {
                 dungeonLabel1, dungeonLabel2,
@@ -90,7 +163,6 @@ namespace ExcelDataExport
 
             foreach (var ctrl in formatControls)
             {
-                // 先计算相对于 GroupBox 的坐标，再更换父容器
                 var loc = new Point(ctrl.Left - groupFormats.Left, ctrl.Top - groupFormats.Top);
                 ctrl.Parent = groupFormats;
                 ctrl.Location = loc;
@@ -101,7 +173,6 @@ namespace ExcelDataExport
             airForm1.Text = "Luban 数据导出管理器";
 
             // ---- 美化 Excel 文件列表 ----
-            // 失焦后仍然保留选中高亮
             excelListBox.HideSelection = false;
 
             // ---- 右键菜单 ----
@@ -163,89 +234,67 @@ namespace ExcelDataExport
         }
 
         /// <summary>
-        /// 右侧日志面板：可停靠 / 弹出为独立窗口
+        /// 命令行输出 — 独立弹窗，自动跟随主窗口
         /// </summary>
-        private void SetupLogPanel()
+        private void SetupLogWindow()
         {
-            // ---- 右侧日志面板（Dock = Right，最简单可靠）----
-            _logPanel = new Panel
+            _logForm = new Form
             {
-                Width = 360,
-                Dock = DockStyle.Right,
-                BackColor = Color.FromArgb(40, 40, 40),
-                Parent = this,
+                Text = "命令输出",
+                Size = new Size(550, 480),
+                StartPosition = FormStartPosition.Manual,
+                Owner = this,
+                Icon = SystemIcons.Application,
             };
-            // airForm1 已经 Dock=Fill，会自动填满 _logPanel 左边的空间
+            // 关闭 = 隐藏；主窗口关闭时（FormOwnerClosing）自动允许
+            _logForm.FormClosing += (_, e) =>
+            {
+                if (e.CloseReason == CloseReason.FormOwnerClosing)
+                    return; // 主窗口在关 → 允许一起关
+                e.Cancel = true;
+                _logForm.Hide();
+            };
+            _logForm.FormClosed += (_, _) => { _logForm = null!; };
+            // 主窗口移动时同步
+            Move += (_, _) =>
+            {
+                if (_logForm?.Visible == true)
+                    _logForm.Location = new Point(Right + 4, Top);
+            };
 
-            // ---- 工具栏 ----
-            var logToolbar = new Panel
+            // 工具栏
+            var toolbar = new Panel
             {
                 Dock = DockStyle.Top,
-                Height = 30,
+                Height = 32,
                 BackColor = Color.FromArgb(50, 50, 50),
-                Parent = _logPanel,
+                Parent = _logForm,
             };
-
             var btnClear = new Button
             {
                 Text = "清空",
                 Size = new Size(50, 24),
-                Location = new Point(4, 3),
+                Location = new Point(4, 4),
                 FlatStyle = FlatStyle.Flat,
                 ForeColor = Color.FromArgb(180, 180, 180),
                 BackColor = Color.FromArgb(70, 70, 70),
                 Font = new Font("Segoe UI", 8F),
-                Parent = logToolbar,
+                Parent = toolbar,
             };
             btnClear.FlatAppearance.BorderSize = 0;
             btnClear.Click += (_, _) => _logBox.Clear();
 
-            var btnFloat = new Button
+            var lbl = new Label
             {
-                Text = "📌 弹出",
-                Size = new Size(60, 24),
-                Location = new Point(58, 3),
-                FlatStyle = FlatStyle.Flat,
-                ForeColor = Color.FromArgb(180, 180, 180),
-                BackColor = Color.FromArgb(70, 70, 70),
+                Text = "导出时自动打开  ·  关闭窗口即隐藏",
+                AutoSize = true,
+                Location = new Point(62, 7),
+                ForeColor = Color.FromArgb(120, 120, 120),
                 Font = new Font("Segoe UI", 8F),
-                Parent = logToolbar,
+                Parent = toolbar,
             };
-            btnFloat.FlatAppearance.BorderSize = 0;
-            btnFloat.Click += (_, _) => FloatLogWindow();
 
-            // ---- 拖拽调整宽度的手柄 ----
-            var resizeHandle = new Panel
-            {
-                Width = 5,
-                Dock = DockStyle.Left,
-                Cursor = Cursors.SizeWE,
-                BackColor = Color.FromArgb(60, 60, 60),
-                Parent = _logPanel,
-            };
-            int startX = 0, startW = 0;
-            resizeHandle.MouseDown += (_, e) =>
-            {
-                if (e.Button == MouseButtons.Left)
-                {
-                    _resizingLog = true;
-                    startX = MousePosition.X;
-                    startW = _logPanel.Width;
-                }
-            };
-            resizeHandle.MouseMove += (_, e) =>
-            {
-                if (!_resizingLog) return;
-                int diff = startX - MousePosition.X;
-                int newW = startW + diff;
-                if (newW > 150 && newW < Width - 200)
-                    _logPanel.Width = newW;
-            };
-            resizeHandle.MouseUp += (_, _) => _resizingLog = false;
-            // 全局松开确保不卡 resize 状态
-            MouseUp += (_, _) => _resizingLog = false;
-
-            // ---- 日志文本框 ----
+            // 日志文本框
             _logBox = new RichTextBox
             {
                 Dock = DockStyle.Fill,
@@ -255,45 +304,25 @@ namespace ExcelDataExport
                 BorderStyle = BorderStyle.None,
                 ReadOnly = true,
                 WordWrap = true,
-                Parent = _logPanel,
+                Parent = _logForm,
             };
 
             AppendLog("就绪。点击「导出全部」开始。");
         }
 
         /// <summary>
-        /// 把日志弹出为独立窗口
+        /// 确保日志窗口可见
         /// </summary>
-        private void FloatLogWindow()
+        private void ShowLogWindow()
         {
-            if (_floatForm != null) return;
-
-            // 从停靠面板取出 RichTextBox
-            _logBox.Parent = null;
-            _logPanel.Visible = false;
-
-            // 创建浮动窗口
-            _floatForm = new Form
+            if (_logForm == null || _logForm.IsDisposed)
             {
-                Text = "命令输出 — 关闭即恢复停靠",
-                Size = new Size(500, 500),
-                StartPosition = FormStartPosition.CenterScreen,
-                Icon = SystemIcons.Application,
-                Owner = this,
-            };
-
-            _logBox.Parent = _floatForm;
-            _logBox.Dock = DockStyle.Fill;
-
-            _floatForm.FormClosing += (_, e) =>
-            {
-                _logBox.Parent = _logPanel;
-                _logBox.Dock = DockStyle.Fill;
-                _logPanel.Visible = true;
-                _floatForm = null;
-            };
-
-            _floatForm.Show();
+                SetupLogWindow();
+            }
+            if (_logForm.Visible) return;
+            _logForm.Location = new Point(Right + 4, Top);
+            _logForm.Show();
+            _logForm.BringToFront();
         }
 
         /// <summary>
@@ -385,55 +414,56 @@ namespace ExcelDataExport
         }
 
         /// <summary>
-        /// 检测 .NET 8 运行时是否已安装
+        /// 检测 .NET 8 运行时是否已安装（不阻塞，最多等 2 秒）
         /// </summary>
-        private static bool IsDotNet8Installed()
+        private static async Task<bool> IsDotNet8InstalledAsync()
         {
-            // 方式 1：调用 dotnet --list-runtimes
             try
             {
-                using var p = Process.Start(new ProcessStartInfo
+                using var p = new Process
                 {
-                    FileName = "dotnet",
-                    Arguments = "--list-runtimes",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true,
-                });
-                if (p != null)
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "dotnet",
+                        Arguments = "--list-runtimes",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        CreateNoWindow = true,
+                    },
+                };
+                p.Start();
+                // 最多等 3 秒，防止 dotnet 进程卡死
+                var readTask = p.StandardOutput.ReadToEndAsync();
+                var timeoutTask = Task.Delay(3000);
+                var completed = await Task.WhenAny(readTask, timeoutTask);
+                if (completed == timeoutTask) return false;
+                return readTask.Result.Contains("Microsoft.NETCore.App 8.0");
+            }
+            catch
+            {
+                // dotnet 不在 PATH，扫目录
+                var dirs = new[]
                 {
-                    p.WaitForExit(5000);
-                    var output = p.StandardOutput.ReadToEnd();
-                    if (output.Contains("Microsoft.NETCore.App 8.0"))
-                        return true;
+                    @"C:\Program Files\dotnet\shared\Microsoft.NETCore.App",
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "dotnet", "shared", "Microsoft.NETCore.App"),
+                };
+                foreach (var d in dirs)
+                {
+                    if (!Directory.Exists(d)) continue;
+                    if (Directory.GetDirectories(d, "8.0.*").Length > 0) return true;
                 }
+                return false;
             }
-            catch { /* dotnet 不在 PATH，继续方式 2 */ }
-
-            // 方式 2：检查常见安装目录
-            var paths = new[]
-            {
-                @"C:\Program Files\dotnet\shared\Microsoft.NETCore.App",
-                @"C:\Program Files (x86)\dotnet\shared\Microsoft.NETCore.App",
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "dotnet", "shared", "Microsoft.NETCore.App"),
-            };
-
-            foreach (var basePath in paths)
-            {
-                if (!Directory.Exists(basePath)) continue;
-                var dirs = Directory.GetDirectories(basePath, "8.0.*");
-                if (dirs.Length > 0) return true;
-            }
-
-            return false;
         }
 
         /// <summary>
-        /// 确保 .NET 8 运行时可用；如未安装则自动运行安装包
+        /// 确保 .NET 8 运行时可用；缺少时提示并打开文件夹让用户手动安装
         /// </summary>
         private async Task<bool> EnsureDotNetRuntimeAsync()
         {
-            if (IsDotNet8Installed())
+            // 异步检测，不卡 UI
+            var installed = await IsDotNet8InstalledAsync();
+            if (installed)
             {
                 AppendLog(".NET 8 运行时 ✓ 已安装");
                 return true;
@@ -443,47 +473,26 @@ namespace ExcelDataExport
 
             string baseDir = Path.GetDirectoryName(Application.ExecutablePath);
             var installerPath = Path.Combine(baseDir, "plugin", "dotnet-runtime-8.0.28-win-x64.exe");
-            if (!File.Exists(installerPath))
-            {
-                AppendLog($"找不到运行时安装包：{installerPath}", isError: true);
-                MessageBox.Show($"未安装 .NET 8 运行时，且找不到安装包：\n{installerPath}",
-                    "运行时缺失", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
+            var pluginDir = Path.Combine(baseDir, "plugin");
 
             var result = MessageBox.Show(
-                "Luban 需要 .NET 8 运行时，当前系统中未检测到。\n\n是否立即安装？",
-                "安装 .NET 8 运行时",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
+                $"未检测到 .NET 8 运行时，Luban 需要它才能运行。\n\n" +
+                $"安装包位置：\n{installerPath}\n\n" +
+                $"点击「确定」打开所在文件夹，请手动双击安装。",
+                ".NET 8 运行时缺失",
+                MessageBoxButtons.OKCancel,
+                MessageBoxIcon.Warning);
 
-            if (result != DialogResult.Yes) return false;
-
-            AppendLog("▶ 正在安装 .NET 8 运行时（静默安装）...");
-            try
+            if (result == DialogResult.OK)
             {
-                using var p = Process.Start(new ProcessStartInfo
-                {
-                    FileName = installerPath,
-                    Arguments = "/install /quiet /norestart",
-                    UseShellExecute = true,
-                    Verb = "runas", // 提权
-                });
-                if (p != null)
-                {
-                    await Task.Run(() => p.WaitForExit());
-                    AppendLog(p.ExitCode == 0
-                        ? "✓ .NET 8 运行时安装完成"
-                        : $"安装程序退出码: {p.ExitCode}", isError: true);
-                }
-            }
-            catch (Exception ex)
-            {
-                AppendLog($"安装失败: {ex.Message}", isError: true);
+                // 打开文件夹定位到安装包
+                if (File.Exists(installerPath))
+                    Process.Start("explorer.exe", $"/select,\"{installerPath}\"");
+                else
+                    Process.Start("explorer.exe", pluginDir);
             }
 
-            // 再检查一次
-            return IsDotNet8Installed();
+            return false;
         }
 
         /// <summary>
@@ -725,8 +734,12 @@ namespace ExcelDataExport
                 return;
             }
 
+            ShowLogWindow();
             _logBox?.Clear();
             AppendLog("======== 开始导出 ========");
+
+            // 同步 Excel 路径到 luban_config.json 的 dataDir
+            SyncLubanConfDataDir();
 
             // 构建 Luban 参数
             var args = new StringBuilder();
@@ -803,6 +816,36 @@ namespace ExcelDataExport
             }
 
             AppendLog("\n======== 导出完成 ========");
+        }
+
+        /// <summary>
+        /// 把当前 Excel 路径的绝对路径写入 luban_config.json 的 dataDir 字段
+        /// </summary>
+        private void SyncLubanConfDataDir()
+        {
+            try
+            {
+                var confPath = JsonConfig.ConfigInstance.LubanConfigPath;
+                if (!File.Exists(confPath)) return;
+
+                var text = File.ReadAllText(confPath);
+                var json = System.Text.Json.Nodes.JsonNode.Parse(text);
+                if (json == null) return;
+
+                var newDir = JsonConfig.ConfigInstance.ExcelsPath;
+                var oldDir = (string?)json["dataDir"];
+
+                if (oldDir == newDir) return; // 没变化
+
+                json["dataDir"] = newDir;
+                File.WriteAllText(confPath,
+                    json.ToJsonString(new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+                AppendLog($"config dataDir: {newDir}");
+            }
+            catch (Exception ex)
+            {
+                AppendLog($"更新 luban_config 失败: {ex.Message}", isError: true);
+            }
         }
 
 
