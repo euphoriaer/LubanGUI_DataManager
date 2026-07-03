@@ -67,6 +67,9 @@ namespace ExcelDataExport
         public bool protobuf_bin { get; set; }
         public bool protobuf_cs { get; set; }
 
+        /// <summary>导出时每种格式在目标目录下建立子文件夹（默认勾选）</summary>
+        public bool use_subfolders { get; set; } = true;
+
 
         /// <summary>
         /// 将空字符串的路径恢复为预设默认值（防止旧配置文件覆盖新默认值）

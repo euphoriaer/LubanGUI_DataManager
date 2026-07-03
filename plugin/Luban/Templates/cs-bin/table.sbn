@@ -75,6 +75,10 @@ public partial class {{__name}}
         {{~end~}}
     }
 
+    public {{declaring_type_name __value_type}} Read<T>(T key)
+    {
+        if (key is {{declaring_type_name __key_type}} keyValue) return GetOrDefault(keyValue); else return null;
+    }
         {{~else if __table.is_list_table ~}}
     private readonly System.Collections.Generic.List<{{declaring_type_name value_type}}> _dataList;
 

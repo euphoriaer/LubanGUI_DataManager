@@ -7,6 +7,7 @@ namespace ExcelDataExport
     {
         private RichTextBox _logBox = null!;
         private Form _logForm = null!;
+        private CheckBox _chkUseSubfolders = null!;
 
         public Main()
         {
@@ -32,19 +33,20 @@ namespace ExcelDataExport
             var tab = 设置;
             if (tab == null) return;
 
-            // ---- GroupBox 1：路径设置（水平拉伸，输入框自适应宽度）----
+            const int gx = 5, gy = 5;
+
+            // ---- GroupBox 1：路径设置 ----
             var groupPaths = new GroupBox
             {
                 Text = "  路径设置  ",
-                Location = new Point(3, 3),
-                Size = new Size(tab.Width - 6, 430),
+                Location = new Point(gx, gy),
+                Size = new Size(tab.Width - gx * 2, 450),
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold),
                 ForeColor = Color.FromArgb(78, 87, 100),
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
                 Parent = tab
             };
 
-            // 每行：TextBox + 浏览按钮 + 📁打开文件夹按钮
             var pathRows = new (Control TB, Control BrowseBtn, string FolderGetter)[]
             {
                 (aloneTextBox1Excel,      aloneButton4,              nameof(JsonConfig.ConfigInstance.ExcelsPath)),
@@ -55,39 +57,31 @@ namespace ExcelDataExport
                 (aloneTextBox1ProtoBufPath,aloneButton5ProtoBuf,     nameof(JsonConfig.ConfigInstance.ProtoBufPath)),
             };
 
-            // 整体布局常量
-            const int marginRight = 12;
-            const int btnGap = 5;
-            const int openBtnW = 30;
-            const int browseBtnW = 130;
+            // 按钮列宽度（锚点在右侧，距右边缘固定）
+            const int btnColWidth = 175; // BrowseBtn + gap + OpenBtn + margin
 
             foreach (var (TB, BrowseBtn, folderGetter) in pathRows)
             {
-                int y = TB.Top - groupPaths.Top;
+                var tbPos = new Point(TB.Left - groupPaths.Left, TB.Top - groupPaths.Top);
+                var btnPos = new Point(BrowseBtn.Left - groupPaths.Left, BrowseBtn.Top - groupPaths.Top);
 
-                // ---- 输入框：锚左上，宽由 Resize 算 ----
                 TB.Parent = groupPaths;
-                TB.Location = new Point(TB.Left - groupPaths.Left, y);
+                TB.Location = tbPos;
                 TB.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+                TB.Width = Math.Max(200, groupPaths.Width - tbPos.X - btnColWidth);
 
-                // ---- 浏览按钮：锚右上 ----
                 BrowseBtn.Parent = groupPaths;
-                BrowseBtn.Size = new Size(browseBtnW, BrowseBtn.Height);
-                // 初始位置：从右边算 openBtnW + gap + browseBtnW + margin
-                BrowseBtn.Location = new Point(
-                    groupPaths.Width - marginRight - openBtnW - btnGap - browseBtnW,
-                    y + (BrowseBtn.Top - groupPaths.Top - y));
+                BrowseBtn.Location = btnPos;
                 BrowseBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 
-                // ---- 📁 按钮：锚右上 ----
+                // 📁 放在浏览按钮右边
                 var openBtn = new Button
                 {
                     Text = "📁",
-                    Size = new Size(openBtnW, BrowseBtn.Height),
-                    // 初始位置：右边距 marginRight
-                    Location = new Point(groupPaths.Width - marginRight - openBtnW, BrowseBtn.Top),
+                    Size = new Size(32, BrowseBtn.Height),
+                    Location = new Point(btnPos.X + BrowseBtn.Width + 4, btnPos.Y),
                     FlatStyle = FlatStyle.Flat,
-                    Font = new Font("Segoe UI", 8F),
+                    Font = new Font("Segoe UI", 9F),
                     ForeColor = Color.FromArgb(124, 133, 142),
                     BackColor = Color.Transparent,
                     Cursor = Cursors.Hand,
@@ -95,6 +89,7 @@ namespace ExcelDataExport
                     Anchor = AnchorStyles.Top | AnchorStyles.Right,
                 };
                 openBtn.FlatAppearance.BorderSize = 0;
+
                 openBtn.Click += (_, _) =>
                 {
                     var path = folderGetter switch
@@ -116,38 +111,27 @@ namespace ExcelDataExport
                 };
             }
 
-            // GroupBox 拉伸时：输入框变宽，按钮自动跟右
+            // GroupBox 拉伸时同步输入框宽度
             groupPaths.Resize += (_, _) =>
             {
-                int gbW = groupPaths.Width;
-                // 右侧被按钮占据的总宽度
-                int btnColW = marginRight + openBtnW + btnGap + browseBtnW + btnGap;
                 foreach (var (TB, _, _) in pathRows)
-                {
-                    TB.Width = Math.Max(200, gbW - TB.Left - btnColW);
-                }
+                    TB.Width = Math.Max(200, groupPaths.Width - TB.Left - btnColWidth);
             };
-            groupPaths.PerformLayout();
-
-            // 初始加载时把输入框拉到正确宽度
-            // 延迟到窗体 Load 后，确保 GroupBox 锚点已生效拿到最终宽度
-            void FixTextBoxWidths()
+            // 初始 + Load 各触发一次确保宽度正确
+            void FixWidths()
             {
-                int gbW = groupPaths.Width;
-                int btnColW = marginRight + openBtnW + btnGap + browseBtnW + btnGap;
                 foreach (var (TB, _, _) in pathRows)
-                    TB.Width = Math.Max(200, gbW - TB.Left - btnColW);
+                    TB.Width = Math.Max(200, groupPaths.Width - TB.Left - btnColWidth);
             }
-
-            FixTextBoxWidths(); // 先立即试一次（尺寸可能已对）
-            Load += (_, _) => FixTextBoxWidths(); // Load 后锚点生效再来一次
+            FixWidths();
+            Load += (_, _) => FixWidths();
 
             // ---- GroupBox 2：导出格式 ----
             var groupFormats = new GroupBox
             {
                 Text = "  导出格式  ",
-                Location = new Point(3, groupPaths.Bottom + 6),
-                Size = new Size(tab.Width - 6, 170),
+                Location = new Point(gx, groupPaths.Bottom + 6),
+                Size = new Size(tab.Width - gx * 2, 170),
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold),
                 ForeColor = Color.FromArgb(78, 87, 100),
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
@@ -160,19 +144,32 @@ namespace ExcelDataExport
                 airCheckBox1, airCheckBox2_cs_bin, airCheckBox6Protobuf_bin,
                 airCheckBox5, airCheckBox3bin_cs, airCheckBox4Protobuf_cs,
             };
-
             foreach (var ctrl in formatControls)
             {
-                var loc = new Point(ctrl.Left - groupFormats.Left, ctrl.Top - groupFormats.Top);
                 ctrl.Parent = groupFormats;
-                ctrl.Location = loc;
+                ctrl.Location = new Point(ctrl.Left - groupFormats.Left, ctrl.Top - groupFormats.Top);
             }
 
-            // 调整窗体标题等美化
+            _chkUseSubfolders = new CheckBox
+            {
+                Text = "每种格式建立子文件夹（推荐）",
+                Checked = true,
+                Location = new Point(8, 134),
+                AutoSize = true,
+                Font = new Font("Segoe UI", 9F),
+                ForeColor = Color.FromArgb(76, 76, 77),
+                Parent = groupFormats,
+            };
+            _chkUseSubfolders.CheckedChanged += (_, _) =>
+            {
+                if (JsonConfig.ConfigInstance == null) return;
+                JsonConfig.ConfigInstance.use_subfolders = _chkUseSubfolders.Checked;
+                JsonConfig.ConfigInstance.SaveConfig();
+            };
+
+            // ---- 全局美化 ----
             Text = "Luban 数据导出管理器";
             airForm1.Text = "Luban 数据导出管理器";
-
-            // ---- 美化 Excel 文件列表 ----
             excelListBox.HideSelection = false;
 
             // ---- 右键菜单 ----
@@ -675,6 +672,8 @@ namespace ExcelDataExport
             airCheckBox3bin_cs.Checked = JsonConfig.ConfigInstance.bin_cs;
             airCheckBox6Protobuf_bin.Checked = JsonConfig.ConfigInstance.protobuf_bin;
             airCheckBox4Protobuf_cs.Checked = JsonConfig.ConfigInstance.protobuf_cs;
+            if (_chkUseSubfolders != null)
+                _chkUseSubfolders.Checked = JsonConfig.ConfigInstance.use_subfolders;
 
             aloneTextBox1Luban.Text = JsonConfig.ConfigInstance.LubanPath;
             aloneTextBox2Data.Text = JsonConfig.ConfigInstance.DataPath;
@@ -747,37 +746,42 @@ namespace ExcelDataExport
             args.Append("-t all ");
             args.Append("-s default ");
 
+            // 子文件夹开关：勾选 → DataPath/json/，不勾选 → DataPath/
+            bool sf = JsonConfig.ConfigInstance.use_subfolders;
+            string dd(string name) => sf ? $"\u0022{JsonConfig.ConfigInstance.DataPath}/{name}\u0022" : $"\u0022{JsonConfig.ConfigInstance.DataPath}\u0022";
+            string cd(string name) => sf ? $"\u0022{JsonConfig.ConfigInstance.ScriptsPath}/{name}\u0022" : $"\u0022{JsonConfig.ConfigInstance.ScriptsPath}\u0022";
+
             if (JsonConfig.ConfigInstance.json_data)
             {
                 args.Append("-d json ");
-                args.Append($"-x json.outputDataDir=\"{JsonConfig.ConfigInstance.DataPath}/json\" ");
+                args.Append($"-x json.outputDataDir={dd("json")} ");
             }
             if (JsonConfig.ConfigInstance.json_cs)
             {
                 args.Append("-c cs-simple-json ");
-                args.Append($"-x cs-simple-json.outputCodeDir=\"{JsonConfig.ConfigInstance.ScriptsPath}/cs_json\" ");
+                args.Append($"-x cs-simple-json.outputCodeDir={cd("cs_json")} ");
             }
             if (JsonConfig.ConfigInstance.cs_bin)
             {
                 args.Append("-c cs-bin ");
-                args.Append($"-x cs-bin.outputCodeDir=\"{JsonConfig.ConfigInstance.ScriptsPath}/cs_bin\" ");
+                args.Append($"-x cs-bin.outputCodeDir={cd("cs_bin")} ");
             }
             if (JsonConfig.ConfigInstance.bin_cs)
             {
                 args.Append("-d bin ");
-                args.Append($"-x bin.outputDataDir=\"{JsonConfig.ConfigInstance.DataPath}/bin\" ");
+                args.Append($"-x bin.outputDataDir={dd("bin")} ");
             }
             if (JsonConfig.ConfigInstance.protobuf_bin)
             {
                 args.Append("-d protobuf3-bin ");
-                args.Append($"-x protobuf3-bin.outputDataDir=\"{JsonConfig.ConfigInstance.DataPath}/protobuf3_bin\" ");
+                args.Append($"-x protobuf3-bin.outputDataDir={dd("protobuf3_bin")} ");
             }
             if (JsonConfig.ConfigInstance.protobuf_cs)
             {
                 args.Append("-c protobuf3 ");
                 args.Append("-c cs-protobuf3 ");
-                args.Append($"-x protobuf3.outputCodeDir=\"{JsonConfig.ConfigInstance.ScriptsPath}/protobuf3\" ");
-                args.Append($"-x cs-protobuf3.outputCodeDir=\"{JsonConfig.ConfigInstance.ScriptsPath}/cs_protobuf3\" ");
+                args.Append($"-x protobuf3.outputCodeDir={cd("protobuf3")} ");
+                args.Append($"-x cs-protobuf3.outputCodeDir={cd("cs_protobuf3")} ");
             }
 
             // --- 第一阶段：运行 Luban ---
@@ -791,7 +795,9 @@ namespace ExcelDataExport
             // --- 第二阶段：protoc C# 代码生成 ---
             if (JsonConfig.ConfigInstance.protobuf_cs)
             {
-                var protoDir = $"{JsonConfig.ConfigInstance.ScriptsPath}/protobuf3";
+                var protoDir = sf
+                    ? Path.Combine(JsonConfig.ConfigInstance.ScriptsPath, "protobuf3")
+                    : JsonConfig.ConfigInstance.ScriptsPath;
                 if (!Directory.Exists(protoDir))
                 {
                     AppendLog($"proto 目录不存在，跳过 protoc 生成：{protoDir}", isError: true);
